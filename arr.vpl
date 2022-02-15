@@ -1,0 +1,323 @@
+//-----------------------------------------------------------------------------
+/* Arr v1.2.vpl, created 2021-10-4 09:00 
+   - Lampu A menyala merah GPRS Connected / Paket data oFF
+   - Lampu A tidak menyala merah GPRS Connected / Paket data on
+   - merah 12 v
+   - hitam ground
+   - biru muda CH
+   - green  CH
+//-----------------------------------------------------------------------------
+sendingTime	Constant 600
+savingTime	Constant 600
+deviceId		Constant 4**
+inputRainfall Digital Input 1
+Daya_12V		Digital Output 1
+led1			LED 1
+led2			LED 2
+*/
+INCLUDE rtcu.inc
+INCLUDE math.inc
+INCLUDE X32.inc
+
+
+VAR_INPUT
+   sendingTime:int;|Interval waktu kirim FTP (600 = 10 menit)
+   savingTime:int;|interval waktu simpan data
+   deviceId: STRING;| kode stasiun
+   //numberServer : STRING; | numberServer
+   inputRainfall : BOOL;
+END_VAR;
+
+
+VAR_OUTPUT
+   Daya_12V:Bool;  
+   led1 : BOOL;
+   led2 : BOOL;
+END_VAR;
+
+
+VAR
+   clock: clockGet;
+   
+   waktu, waktu_simpan, waktu_kirim, waktu_reset :DINT;
+   
+   yearTwoDigit, datetime, voltage, strRainFall, rainFall, strSave, strSend, strSdcard, staSD,strnilai_volt, day, month, year, str,
+   result, filename, hour, minute, second, namafileFTP, strTGL, strWKT, STA, rainRateString, dataSms, pesan : STRING;
+   
+   volt, tipping, hari_aktual, hari_reset, countSms :INT;
+   
+   float_volt, nilai_hujan, hasil, nilai_hujan_kirim, floatRainFall, 
+   rainRate , rainFallOld: FLOAT;
+   
+   mediaPresent, xsimpan, xkirim, xreset, open : BOOL;
+   
+   fd, fdFTP :FILE;
+
+   hscounter, counter_kirim : PCT;
+   
+   level:SINT;  
+   
+END_VAR;
+
+/*
+
+FUNCTION sendSms;
+
+      VAR_INPUT
+         
+         rainRate  : FLOAT;
+         
+      END_VAR;
+      
+      
+      clock();     
+      
+      
+      dataSms:="Nama Stasiun : Palikanci 1"+"$N"+"Waktu : "+day+"/"+month+"/"+year+" "+hour+":"+minute+"$N"+"Intensitas : "+rainRateString+" mm/jam$N"+"Curah Hujan : "+floatToStr(v:= floatRainfall)+" mm$N"+"Status : "+pesan;
+      gsmSendSMS(phonenumber := numberServer, message := dataSms);
+      DebugMsg(message:=dataSms);
+      
+END_FUNCTION;
+
+*/
+
+FUNCTION save;
+
+      VAR_INPUT
+         
+         fileName, rainFall, voltage  : STRING;
+         
+      END_VAR
+      
+      clock();
+      fsMediaOpen(media:=0); // 0 SD card; 1 internal drive
+      fsDirChange(path := "A:\"); //A SD Card
+      
+      IF fsFileExists(name := filename) THEN
+         fd := fsFileOpen(name := fileName);
+         DebugFmt(message := "Membuka File");
+      ELSE
+         fd := fsFileCreate(name := fileName);
+         DebugFmt(message := "Membuat File");
+      END_IF;
+      
+      IF fsFileStatus(fd:=fd) = 0 THEN                
+         fsFileWriteString(fd := fd, str :=  day);
+         fsFileWriteString(fd := fd, str := "-" + month);
+         fsFileWriteString(fd := fd, str := "-" + year);
+         fsFileWriteString(fd := fd, str := " " + hour);
+         fsFileWriteString(fd := fd, str := ":" + minute);
+         fsFileWriteString(fd := fd, str := ":" + second+" ");         
+         fsFileWriteString(fd := fd, str := strFormat(format := rainFall+" "+voltage+"$N"));
+         fsFileWriteString(fd := fd, str := str);
+         fsFileClose(fd := fd);
+         DebugFmt(message := "Menulis di SD Card");
+      END_IF;
+      
+      fsMediaClose(media := 0);       
+      DebugFmt(message :="Menyimpan Data");
+      xsimpan:=TRUE;
+      
+
+END_FUNCTION
+
+FUNCTION send;
+      VAR_INPUT
+         
+         deviceId, datetime, fileName, rainFall, voltage  : STRING;
+         
+      END_VAR
+      
+      
+      VAR
+         id    : INT;
+         host  : STRING := "ftp.dataonline.co.id";
+         usr   : STRING := "spas@dataonline.co.id";
+         pwd   : STRING := "mnisuper";
+      END_VAR;
+      
+      fsMediaOpen(media:=1); // 0 SD card; 1 internal drive
+      fsDirChange(path := "B:\");
+  
+      IF fsFileExists(name := fileName) THEN
+         fdFTP := fsFileOpen(name := fileName);
+         DebugMsg(message := "Opening File To Internal");
+      ELSE
+         fdFTP := fsFileCreate(name := fileName);
+         DebugMsg(message := "Creating File To Internal");
+      END_IF;
+      
+      IF fsFileStatus(fd:=fdFTP) = 0 THEN
+         fsFileWriteString(fd := fdFTP, str := deviceId +",");
+         fsFileWriteString(fd := fdFTP, str := datetime+",");
+         fsFileWriteString(fd := fdFTP, str := rainFall+",");
+         fsFileWriteString(fd := fdFTP, str := voltage+"$N");
+         fsFileWriteString(fd:= fdFTP,  str := str);
+         fsFileClose(fd:= fdFTP);
+         DebugMsg(message := "Writing File To Internal");
+      END_IF; 
+     
+      ftpOpen();
+      open := (ftpOpen() = 0);
+   
+      IF open THEN
+            
+            
+           id := ftpConnect(host := host, username := usr, password := pwd);
+           DebugFmt(message :="Connecting FTP:\1", v1:=ftpConnect() );
+           ftpFileSend(id := id, name := fileName, local := fileName);
+           ftpDisconnect(id := id);
+           DebugFmt(message :="Sending File Internal To FTP:\1", v1:=ftpFileSend() );
+      END_IF;  
+
+      IF fsFileExists(name := fileName) THEN
+            fsFileDelete(name := fileName);
+            DebugFmt(message := "Delete File");
+      END_IF;
+      
+      ftpClose();
+      xkirim:=true;      
+
+END_FUNCTION
+
+PROGRAM arr;
+   gsmPower(power := ON);  
+   gprsOpen();  
+   gprsConnected();    
+   daya_12V := TRUE;
+   clock();   
+   strSave  :=strFormat(format:="Saving= \1",v1:=savingTime);
+   strSend  :=strFormat(format:="Sending= \1",v1:=sendingTime);
+   DebugMsg(message:=strSave);
+   DebugMsg(message:=strSend);
+   
+      IF mediaPresent <> fsMediaPresent(media := 0) THEN
+       staSD:="OK";
+      ELSE
+       staSD:="NAN";
+      END_IF;
+      
+   strSDcard := strFormat(format:="SD Card= " + staSD);
+   DebugMsg(message:=strSDcard);
+   hscounter.pinput:=ADDR(inputRainfall); 
+   counter_kirim.pinput:=ADDR(inputRainfall);
+   countSms := 0;
+  
+BEGIN
+   clock();
+   waktu     := clockNow(); 
+   day       := sintToStr(v := clock.day);
+   month     := sintToStr(v := clock.month);
+   year      := intToStr(v := clock.year);
+   hour      := sintToStr(v := clock.hour);
+   minute    := sintToStr(v := clock.minute);
+   second    := sintToStr(v := clock.second);
+   
+   IF gprsConnected() THEN
+      led2  :=OFF;
+   ELSE
+      led2  :=ON;
+   END_IF;   
+   
+   hscounter();
+   counter_kirim();
+   waktu_simpan   := waktu MOD savingTime;
+   waktu_kirim    := waktu MOD sendingTime;
+   waktu_reset    := waktu MOD 86400; 
+      
+   IF waktu_reset = 0 AND xreset = FALSE THEN
+      counter_kirim.ld  := TRUE;
+      hscounter.ld      := TRUE;
+      xreset            := TRUE;
+   END_IF;
+   
+   IF waktu_reset > 0  THEN 
+       xreset           := FALSE;
+       hscounter.ld     := FALSE;
+       counter_kirim.ld := FALSE;
+   END_IF;   
+ 
+   IF savingTime = 0 THEN 
+       xsimpan := FALSE;
+   END_IF;
+   
+   IF sendingTime = 0 THEN 
+       xkirim  := FALSE;
+   END_IF; 
+   
+   tipping        := INT(hscounter.cv);
+   floatRainFall  := FLOAT(tipping)*0.2;
+ 
+
+   IF waktu_simpan = 0 AND xsimpan = FALSE THEN 
+
+      yearTwoDigit   := strRight(str:=year, length:=2);
+      fileName       := month + yearTwoDigit + day +".txt"; 
+      tipping        := INT(hscounter.cv);
+      floatRainFall  := FLOAT(tipping)*0.2;
+      rainFall       := floatToStr(v:=floatRainfall);
+      volt           := boardSupplyVoltage() ;
+      Float_volt     := FLOAT(volt)/10.0;
+      voltage        := floatToStr(v:=Float_volt);
+      save(fileName:=fileName, rainFall := rainFall, voltage := voltage); 
+      
+   END_IF;
+  
+   IF waktu_simpan > 0  THEN 
+      xsimpan := FALSE ;
+   END_IF;
+    
+   IF waktu_kirim = 0 AND xkirim = FALSE THEN 
+ 
+      yearTwoDigit   := strRight(str:=year, length:=2);
+      fileName       := deviceId + month + yearTwoDigit + day +".txt"; 
+      tipping        := INT(hscounter.cv);
+      floatRainFall  := FLOAT(tipping)*0.2;  
+      rainFall       := floatToStr(v:= floatRainFall);
+      volt           := boardSupplyVoltage() ;
+      Float_volt     := FLOAT(volt)/10.0;
+      voltage        := floatToStr(v:=Float_volt);
+      datetime       := dintToStr(v:= waktu);      
+      send(deviceId:=deviceId, datetime:=datetime, fileName:=fileName, rainFall := rainFall, voltage := voltage);  
+
+      /* Notifikasi sms
+
+      rainRate := floatRainfall - rainFallOld;
+      rainRate := rainRate * 6.0;
+      rainRateString := floatToStr(v:=rainrate);    
+
+       IF rainRate >= 50.0 AND rainRate <  100.0  THEN
+            pesan := "Hujan Sedang";
+            sendSms(rainRate:= rainRate );
+       ELSIF rainRate >= 100.0 AND rainRate < 150.0  THEN
+            pesan := "Hujan Lebat";
+            sendSms(rainRate:= rainRate );
+       ELSIF rainRate >= 150.0 THEN
+            pesan := "Hujan Sangat Lebat ";
+            sendSms(rainRate:= rainRate );
+       END_IF;
+       
+       DebugMsg(message:= pesan);
+       
+       rainfallOld := floatRainFall;
+       DebugFmt(message:="Rainrate:" + floatToStr(v:=rainrate));
+       DebugFmt(message:="Rainfall: " +floatToStr(v:=floatRainfall));
+       
+       */
+       
+   END_IF;
+  
+   IF waktu_kirim > 0  THEN 
+      xkirim := FALSE ;    
+   END_IF;   
+
+Sleep(delay:=1000);
+
+//DebugFmt(message:="Hujan simpan: " +floatToStr(v:=Nilai_Hujan));
+//DebugFmt(message:="tipp: " +intToStr(v:=tipping));
+//DebugFmt(message:="............................................... ");
+
+//DebugFmt(message:="............................................... ");
+END;
+
+END_PROGRAM;

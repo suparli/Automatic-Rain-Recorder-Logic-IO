@@ -1,0 +1,17 @@
+****************************************
+*** VPL interface definition file ***
+****************************************
+Program name: arr
+DSEG size   : 1380 bytes
+
+   name                       type         ival  info
+----------------------------------------------------------------------------
+*** INPUTS:
+---sendingTime                int            0  Interval waktu kirim FTP (600 = 10 menit)
+---savingTime                 int            0  interval waktu simpan data
+---deviceId                   string        27  kode stasiun
+---inputRainfall              bool           0  kode stasiun
+*** OUTPUTS:
+---Daya_12V                   bool           0  kode stasiun
+---led1                       bool           0  kode stasiun
+---led2                       bool           0  kode stasiun

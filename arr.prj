@@ -1,0 +1,228 @@
+<?xml version="1.0" standalone="no" ?>
+<RTCUIDEProject>
+    <createversion>9.86</createversion>
+    <modifyversion>9.90</modifyversion>
+    <projecttype>VPL</projecttype>
+    <build>
+        <version>986</version>
+        <flags>15</flags>
+    </build>
+    <projectsetup>
+        <ExtImage>0</ExtImage>
+        <AppName>arr</AppName>
+        <AppVer>1</AppVer>
+    </projectsetup>
+    <flags>
+        <flag>X32</flag>
+        <flag>LARGE</flag>
+        <flag>EIS</flag>
+    </flags>
+    <defines />
+    <source>
+        <item>
+            <file>.\arr.vpl</file>
+            <folding>
+                <line>31</line>
+                <line>38</line>
+                <line>61</line>
+                <line>83</line>
+                <line>123</line>
+                <line>282</line>
+            </folding>
+        </item>
+    </source>
+    <include />
+    <voice />
+    <ioext />
+    <jobs>
+        <job name="Job_arr">
+            <file>.\arr.vpx</file>
+            <class>1</class>
+            <config>
+                <item name="sendingTime">
+                    <var>
+                        <symClass>1</symClass>
+                        <type>3</type>
+                        <typename>INT</typename>
+                        <fubTypename></fubTypename>
+                        <info>Interval waktu kirim FTP (600 = 10 menit)</info>
+                        <offDseg>0</offDseg>
+                        <elemSize>2</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>3</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>600</value>
+                        <text></text>
+                    </value>
+                </item>
+                <item name="savingTime">
+                    <var>
+                        <symClass>1</symClass>
+                        <type>3</type>
+                        <typename>INT</typename>
+                        <fubTypename></fubTypename>
+                        <info>interval waktu simpan data</info>
+                        <offDseg>2</offDseg>
+                        <elemSize>2</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>3</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>600</value>
+                        <text></text>
+                    </value>
+                </item>
+                <item name="deviceId">
+                    <var>
+                        <symClass>1</symClass>
+                        <type>5</type>
+                        <typename>STRING</typename>
+                        <fubTypename></fubTypename>
+                        <info>kode stasiun</info>
+                        <offDseg>4</offDseg>
+                        <elemSize>2</elemSize>
+                        <init>
+                            <Value>27</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>3</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value></value>
+                        <text>404</text>
+                    </value>
+                </item>
+                <item name="inputRainfall">
+                    <var>
+                        <symClass>1</symClass>
+                        <type>1</type>
+                        <typename>BOOL</typename>
+                        <fubTypename></fubTypename>
+                        <info>kode stasiun</info>
+                        <offDseg>8</offDseg>
+                        <elemSize>1</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>1</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>65536</value>
+                        <text></text>
+                    </value>
+                </item>
+                <item name="Daya_12V">
+                    <var>
+                        <symClass>2</symClass>
+                        <type>1</type>
+                        <typename>BOOL</typename>
+                        <fubTypename></fubTypename>
+                        <info>kode stasiun</info>
+                        <offDseg>12</offDseg>
+                        <elemSize>1</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>2</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>65536</value>
+                        <text></text>
+                    </value>
+                </item>
+                <item name="led1">
+                    <var>
+                        <symClass>2</symClass>
+                        <type>1</type>
+                        <typename>BOOL</typename>
+                        <fubTypename></fubTypename>
+                        <info>kode stasiun</info>
+                        <offDseg>13</offDseg>
+                        <elemSize>1</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>2</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>196608</value>
+                        <text></text>
+                    </value>
+                </item>
+                <item name="led2">
+                    <var>
+                        <symClass>2</symClass>
+                        <type>1</type>
+                        <typename>BOOL</typename>
+                        <fubTypename></fubTypename>
+                        <info>kode stasiun</info>
+                        <offDseg>14</offDseg>
+                        <elemSize>1</elemSize>
+                        <init>
+                            <Value>0</Value>
+                            <String></String>
+                        </init>
+                    </var>
+                    <type>2</type>
+                    <negate>0</negate>
+                    <configured>1</configured>
+                    <value>
+                        <value>196609</value>
+                        <text></text>
+                    </value>
+                </item>
+            </config>
+        </job>
+    </jobs>
+    <projectdrive />
+    <files>
+        <filter name="VPL Program" />
+        <filter name="VPL Include" />
+        <filter name="User" />
+        <filter name="LUA Program" />
+        <filter name="LUA Library" />
+        <filter name="Project Drive" />
+        <filter name="Platform Extension" />
+        <filter name="Internal Drive" />
+    </files>
+    <device>
+        <flex name="Standard 1" type="1" digital="0" input="0" debounce="0">
+            <high rising="0" falling="0" />
+            <low rising="0" falling="0" />
+        </flex>
+        <flex name="Standard 2" type="1" digital="1" input="1" debounce="0">
+            <high rising="0" falling="0" />
+            <low rising="0" falling="0" />
+        </flex>
+        <flex name="Standard 3" type="1" digital="2" input="2" debounce="0">
+            <high rising="0" falling="0" />
+            <low rising="0" falling="0" />
+        </flex>
+        <flex name="Standard 4" type="1" digital="3" input="3" debounce="0">
+            <high rising="0" falling="0" />
+            <low rising="0" falling="0" />
+        </flex>
+    </device>
+</RTCUIDEProject>
